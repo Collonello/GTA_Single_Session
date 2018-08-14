@@ -1,0 +1,15 @@
+﻿<Window x:Class="GTA_Single_Session.Help"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GTA_Single_Session"
+        mc:Ignorable="d"
+        Title="Help" Height="250" Width="250"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="The purpose of this application is to find any GTA process, stop it for a few seconds and then unblock it to cause a delay that leaves you in the public session. To use it, make sure you're in a public GTA Online session, then click 'Create a single session' button, wait a few seconds, and then return to GTA." VerticalAlignment="Top" Height="202" Width="225"/>
+
+    </Grid>
+</Window>
