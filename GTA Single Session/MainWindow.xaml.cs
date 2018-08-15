@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace GTA_Single_Session {
 
@@ -14,11 +15,12 @@ namespace GTA_Single_Session {
         // 1 = wait a moment
         // 2 = done
 
-        int status = 0;
+        int status;
 
         public MainWindow() {
             InitializeComponent();
             bar.Visibility = Visibility.Hidden;
+            HideText();
 
             System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
@@ -88,6 +90,72 @@ namespace GTA_Single_Session {
         static extern int ResumeThread(IntPtr hThread);
         [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
         static extern bool CloseHandle(IntPtr handle);
+
+        [DllImport("User32.dll")]
+        private static extern bool RegisterHotKey(
+            [In] IntPtr hWnd,
+            [In] int id,
+            [In] uint fsModifiers,
+            [In] uint keys);
+
+        [DllImport("User32.dll")]
+        private static extern bool UnregisterHotKey(
+            [In] IntPtr hWnd,
+            [In] int id);
+
+        private HwndSource _source;
+        private const int KILL = 1;
+
+        protected override void OnSourceInitialized(EventArgs e) {
+            base.OnSourceInitialized(e);
+            var helper = new WindowInteropHelper(this);
+            _source = HwndSource.FromHwnd(helper.Handle);
+            _source.AddHook(HwndHook);
+            RegisterHotKey();
+        }
+
+        protected override void OnClosed(EventArgs e) {
+            _source.RemoveHook(HwndHook);
+            _source = null;
+            UnregisterHotKey();
+            base.OnClosed(e);
+        }
+
+        private void RegisterHotKey() {
+            var helper = new WindowInteropHelper(this);
+            const uint F4 = 0x73;
+            const uint CTRL = 0x0002;
+            if (!RegisterHotKey(helper.Handle, KILL, CTRL, F4)) {
+                UnregisterHotKey();
+            }
+        }
+
+        private void UnregisterHotKey() {
+            var helper = new WindowInteropHelper(this);
+            UnregisterHotKey(helper.Handle, KILL);
+        }
+
+        private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) {
+            const int WM_HOTKEY = 0x0312;
+            switch (msg) {
+                case WM_HOTKEY:
+                    switch (wParam.ToInt32()) {
+                        case KILL:
+                            OnHotKeyPressed();
+                            handled = true;
+                            break;
+                    }
+                    break;
+            }
+            return IntPtr.Zero;
+        }
+
+        private void OnHotKeyPressed() {
+            Process[] p = Process.GetProcessesByName("GTA5");
+            for (int i = 0; i < p.Length; i++) {
+                Process.GetProcessById(p[i].Id).Kill();
+            }
+        }
 
 
         private static void SuspendProcess(int pid) {
@@ -170,5 +238,11 @@ namespace GTA_Single_Session {
             Help help = new Help();
             help.Show();
         }
+
+        public async void HideText() {
+            await Task.Delay(10000);
+            label2.Visibility = Visibility.Hidden;
+        }
+        
     }
 }
