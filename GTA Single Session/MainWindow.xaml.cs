@@ -7,20 +7,48 @@ using System.Windows.Media;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace GTA_Single_Session {
 
     public partial class MainWindow : Window {
-        
-        // 1 = wait a moment
-        // 2 = done
 
         int status;
+        uint KEY1;
+        uint KEY2;
 
         public MainWindow() {
             InitializeComponent();
             bar.Visibility = Visibility.Hidden;
             HideText();
+
+
+            string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            label1.Content = "v." + version;
+
+            string path = Directory.GetCurrentDirectory();
+            string settings = Path.Combine(path, "settings");
+
+
+            if (!File.Exists(settings)) {
+                string[] keys = { "0x0002", "0x73" };
+
+                using (StreamWriter outputFile = new StreamWriter(System.IO.Path.Combine(path, "settings"))) {
+                    foreach (string key in keys)
+                        outputFile.WriteLine(key);
+                }
+
+                System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
+                Application.Current.Shutdown();
+            } else {
+                string key1 = File.ReadLines(@settings).Skip(0).FirstOrDefault();
+                string key2 = File.ReadLines(@settings).Skip(1).FirstOrDefault();
+
+                KEY1 = Convert.ToUInt16(key1, 16);
+                KEY2 = Convert.ToUInt16(key2, 16);
+            }
 
             System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
@@ -123,9 +151,7 @@ namespace GTA_Single_Session {
 
         private void RegisterHotKey() {
             var helper = new WindowInteropHelper(this);
-            const uint F4 = 0x73;
-            const uint CTRL = 0x0002;
-            if (!RegisterHotKey(helper.Handle, KILL, CTRL, F4)) {
+            if (!RegisterHotKey(helper.Handle, KILL, KEY1, KEY2)) {
                 UnregisterHotKey();
             }
         }
@@ -243,6 +269,11 @@ namespace GTA_Single_Session {
             await Task.Delay(10000);
             label2.Visibility = Visibility.Hidden;
         }
-        
+
+        private void settings_Click(object sender, RoutedEventArgs e) {
+            Shortcut shortcut = new Shortcut();
+            shortcut.Show();
+            this.Close();
+        }
     }
 }

@@ -12,6 +12,7 @@
     <Grid>
         <DockPanel>
             <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_Settings" Click="settings_Click"/>
                 <MenuItem Header="_About">
                     <MenuItem Header="_Source code" Click="source_click"/>
                     <MenuItem Header="_Help" Click="help_click"/>
@@ -24,7 +25,7 @@
         <Button x:Name="button1" Content="Exit" HorizontalAlignment="Center" Margin="0,160,0,0" VerticalAlignment="Top" Width="75" Click="button1_Click"/>
         <Label x:Name="label" Content="Searching for GTA process..." HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="10,35,10.333,0" VerticalAlignment="Top" FontSize="24" Width="373"/>
         <ProgressBar x:Name="bar" HorizontalAlignment="Center" Height="10" Margin="0,90,0,0" VerticalAlignment="Top" Width="100" Minimum="0" Maximum="100"/>
-        <Label x:Name="label1" Content="v1.0.2" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-        <Label x:Name="label2" Content="What's new: hit Ctrl+F4 to instantly force quit GTA" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        <Label x:Name="label1" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+        <Label x:Name="label2" Content="What's new: you can set shortcut to force quit in settings" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>
