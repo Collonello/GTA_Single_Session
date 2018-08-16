@@ -28,16 +28,15 @@ namespace GTA_Single_Session {
             string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             label1.Content = "v." + version;
 
-            string path = Directory.GetCurrentDirectory();
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string settings = Path.Combine(path, "settings");
 
 
             if (!File.Exists(settings)) {
-                string[] keys = { "0x0002", "0x73" };
+                string key = "0x0002" + "\r\n" + "0x73";
 
                 using (StreamWriter outputFile = new StreamWriter(System.IO.Path.Combine(path, "settings"))) {
-                    foreach (string key in keys)
-                        outputFile.WriteLine(key);
+                    outputFile.WriteLine(key);
                 }
 
                 System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);

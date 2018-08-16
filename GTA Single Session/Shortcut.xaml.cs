@@ -59,7 +59,7 @@ namespace GTA_Single_Session {
         }
 
         private void button_Click(object sender, RoutedEventArgs e) {
-            string path = Directory.GetCurrentDirectory();
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             string key = first_key_uint + "\r\n" + second_key_uint;
             
