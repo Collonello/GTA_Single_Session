@@ -26,6 +26,6 @@
         <Label x:Name="label" Content="Searching for GTA process..." HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="10,35,10.333,0" VerticalAlignment="Top" FontSize="24" Width="373"/>
         <ProgressBar x:Name="bar" HorizontalAlignment="Center" Height="10" Margin="0,90,0,0" VerticalAlignment="Top" Width="100" Minimum="0" Maximum="100"/>
         <Label x:Name="label1" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-        <Label x:Name="label2" Content="What's new: you can set shortcut to force quit in settings" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        <Label x:Name="label2" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>

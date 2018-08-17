@@ -9,7 +9,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using System.Net;
 
 namespace GTA_Single_Session {
 
@@ -18,22 +19,21 @@ namespace GTA_Single_Session {
         int status;
         uint KEY1;
         uint KEY2;
+        string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         public MainWindow() {
             InitializeComponent();
             bar.Visibility = Visibility.Hidden;
-            HideText();
 
+            CheckVersion();
 
-            string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            label1.Content = "v." + version;
+            label1.Content = "v." + version.Remove(version.Length - 2);
 
             string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string settings = Path.Combine(path, "settings");
 
-
             if (!File.Exists(settings)) {
-                string key = "0x0002" + "\r\n" + "0x73";
+                string key = "0x0002\r\n0x73";
 
                 using (StreamWriter outputFile = new StreamWriter(System.IO.Path.Combine(path, "settings"))) {
                     outputFile.WriteLine(key);
@@ -80,8 +80,11 @@ namespace GTA_Single_Session {
                         bar.Visibility = Visibility.Hidden;
                         label.Foreground = green;
                         label.Content = "Done. You can play now";
-                        button.IsEnabled = false;
+                        button.IsEnabled = true;
                         button1.IsEnabled = true;
+                        Task.Delay(2500).ContinueWith(_ => {
+                            status = 0;
+                        });
                     } else {
                         label.Foreground = green;
                         label.Content = "GTA is running";
@@ -93,7 +96,6 @@ namespace GTA_Single_Session {
                     button.IsEnabled = false;
                 }
             }
-
         }
 
         [Flags]
@@ -182,7 +184,6 @@ namespace GTA_Single_Session {
             }
         }
 
-
         private static void SuspendProcess(int pid) {
             var process = Process.GetProcessById(pid);
 
@@ -224,6 +225,47 @@ namespace GTA_Single_Session {
             }
         }
 
+        public async void CheckVersion() {
+            using (WebClient client = new WebClient()) {
+                try {
+                    client.Headers.Add("User-Agent", "Anything");
+                    var json = await client.DownloadStringTaskAsync("http://api.github.com/repos/PawelPleskaczynski/GTA_Single_Session/releases");
+
+                    dynamic array = JsonConvert.DeserializeObject(json);
+                    string version_github = array[0].tag_name;
+                    int update = versionCompare(version.Remove(version.Length - 2), version_github);
+                    if (update == 0) {
+                        HideText();
+                        label2.Content = "You're using the latest version";
+                    } else if (update == -1) {
+                        HideText();
+                        label2.Content = "New version is available (click to download)";
+                        label2.MouseLeftButtonDown += DownloadUpdate;
+                    }
+                } catch (Exception) { }
+            }
+        }
+
+        void DownloadUpdate(object Sender, RoutedEventArgs e) {
+            System.Diagnostics.Process.Start("https://github.com/PawelPleskaczynski/GTA_Single_Session/releases");
+        }
+
+        public static int versionCompare(String str1, String str2) {
+            String[] vals1 = str1.Split(new[] { "\\." }, StringSplitOptions.None);
+            String[] vals2 = str2.Split(new[] { "\\." }, StringSplitOptions.None);
+            int i = 0;
+
+            while (i < vals1.Length && i < vals2.Length && vals1[i].Equals(vals2[i])) {
+                i++;
+            }
+
+            if (i < vals1.Length && i < vals2.Length) {
+                int diff = vals1[i].CompareTo(vals2[i]);
+                return Math.Sign(diff);
+            }
+
+            return Math.Sign(vals1.Length - vals2.Length);
+        }
 
         private void button_Click(object sender, RoutedEventArgs e) {
             Process[] p = Process.GetProcessesByName("GTA5");
